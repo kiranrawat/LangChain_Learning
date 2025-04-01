@@ -2,6 +2,7 @@ from langchain import PromptTemplate
 from langchain.chat_models import ChatOpenAI, ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 from langchain.chains import LLMChain
+from third_parties.linkedin import scrape_linkedin_profile
 
 import os
 from dotenv import load_dotenv
@@ -23,7 +24,7 @@ if __name__ == "__main__":
     # print(os.environ['OPENAI_API_KEY'])
 
     summary_template = """
-        given the information {information} about a person from I want you to create:
+        given the Linkedin information {information} about a person from I want you to create:
         1. a short summary
         2. two interesting facts about them
     """
@@ -32,11 +33,13 @@ if __name__ == "__main__":
     )
 
     # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")  # 0 means not creative
-    # llm = ChatOllama(model="llama3", temperature=0)
-    llm = ChatOllama(model="mistral")
+    llm = ChatOllama(model="llama3", temperature=0)
+    # llm = ChatOllama(model="mistral")
     chain = (
         summary_prompt_template | llm | StrOutputParser()
     )  # tie eveyrthing together (making an openai call)
+    linkedin_data = scrape_linkedin_profile(
+        linkedin_profile_url="https://krawat", mock=True)
     res = chain.invoke(input={"information": information})
 
     print(res)
